@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Register - Trading Journal</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <div class="main-content">
+    <section class="section-container">
+      <h2>Register</h2>
+      <form action="{{ url_for('register') }}" method="POST">
+        <div class="form-row">
+          <label for="username">Username:</label>
+          <input type="text" name="username" id="username" required>
+        </div>
+        <div class="form-row">
+          <label for="email">Email:</label>
+          <input type="email" name="email" id="email" required>
+        </div>
+        <div class="form-row">
+          <label for="password">Password:</label>
+          <input type="password" name="password" id="password" required>
+        </div>
+        <div class="form-row">
+          <button type="submit">Register</button>
+        </div>
+      </form>
+      <p>Already have an account? <a href="{{ url_for('login') }}">Login here</a></p>
+    </section>
+  </div>
+</body>
+</html>

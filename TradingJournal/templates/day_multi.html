@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+{% block title %}Day: {{ day.date }}{% endblock %}
+{% block content %}
+
+<!-- Page Header with Day PnL and Add Trade button -->
+<div style="display: flex; justify-content: space-between; align-items: center;">
+  <h2>Day: {{ day.date }}</h2>
+  <button type="button" onclick="toggleAddTradeForm()">Add Trade</button>
+</div>
+<p><strong>Day PnL:</strong> ${{ "%.2f"|format(day.pnl) }}</p>
+
+<!-- List Existing Trades -->
+<section class="section-container">
+  <h3>Trades for This Day</h3>
+  {% if day.trades|length == 0 %}
+    <p>No trades yet.</p>
+  {% else %}
+    {% for trade in day.trades %}
+      <!-- Each Trade as a "journal entry" card -->
+      <div class="trade-card" style="border: 2px solid #444; padding: 15px; margin-bottom: 20px; border-radius: 8px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h4>Trade #{{ trade.id }}</h4>
+          <!-- Edit button toggles a hidden form for editing this trade -->
+          <button type="button" onclick="toggleEditTradeForm({{ trade.id }})">Edit</button>
+        </div>
+
+        <p><strong>Side:</strong> {{ trade.side|title }} 
+           | <strong>Ticker:</strong> {{ trade.ticker }} 
+           | <strong>Type:</strong> {{ trade.trade_type }}</p>
+        <p><strong>Entry Price:</strong> {{ trade.entry_price }} 
+           | <strong>Exit Price:</strong> {{ trade.exit_price }} 
+           | <strong>Contracts:</strong> {{ trade.contract_count }}</p>
+        <p><strong>Trade PnL:</strong> ${{ "%.2f"|format(trade.trade_pnl) }}</p>
+        <p><strong>Notes:</strong> {{ trade.trade_notes }}</p>
+
+        <!-- Scale Events -->
+        {% if trade.scale_events|length > 0 %}
+          <p><strong>Scale Events:</strong></p>
+          <ul>
+            {% for scale in trade.scale_events %}
+              <li>Price: {{ scale.scale_price }} | Contracts: {{ scale.scale_contracts }}</li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p>No scale events.</p>
+        {% endif %}
+
+        <!-- Screenshots (DayRecord-based) -->
+        {% set day_shots = day.screenshots|selectattr("date","equalto",day.date)|list %}
+        {% if day_shots|length > 0 %}
+          <div style="margin-top: 15px; display: flex; flex-wrap: wrap; gap: 10px;">
+            {% for shot in day_shots %}
+              <div style="border: 2px solid #444; border-radius: 8px; padding: 5px;">
+                <a href="{{ url_for('static', filename=shot.file_path) }}" target="_blank">
+                  <img src="{{ url_for('static', filename=shot.file_path) }}" alt="Screenshot" style="max-width: 200px;">
+                </a>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p>No screenshots.</p>
+        {% endif %}
+
+        <!-- Hidden Edit Trade Form -->
+        <section class="section-container" id="editTradeForm_{{ trade.id }}" style="display: none; margin-top: 20px;">
+          <h3>Edit Trade #{{ trade.id }}</h3>
+          <form action="{{ url_for('edit_trade', trade_id=trade.id) }}" method="POST" enctype="multipart/form-data">
+            <div class="form-row">
+              <label>Side (Buy/Sell):</label>
+              <select name="side">
+                <option value="buy" {% if trade.side == 'buy' %}selected{% endif %}>Buy</option>
+                <option value="sell" {% if trade.side == 'sell' %}selected{% endif %}>Sell</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label>Ticker:</label>
+              <input type="text" name="ticker" value="{{ trade.ticker }}">
+            </div>
+            <div class="form-row">
+              <label>Trade Type:</label>
+              <select name="trade_type">
+                <option value="">-- Select --</option>
+                <option value="futures" {% if trade.trade_type == 'futures' %}selected{% endif %}>Futures</option>
+                <option value="options" {% if trade.trade_type == 'options' %}selected{% endif %}>Options</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label>Entry Price:</label>
+              <input type="number" name="entry_price" step="any" value="{{ trade.entry_price }}">
+            </div>
+            <div class="form-row">
+              <label>Exit Price:</label>
+              <input type="number" name="exit_price" step="any" value="{{ trade.exit_price }}">
+            </div>
+            <div class="form-row">
+              <label>Contracts:</label>
+              <input type="number" name="contract_count" min="1" value="{{ trade.contract_count }}">
+            </div>
+            <div class="form-row">
+              <label>Notes:</label>
+              <textarea name="trade_notes" rows="2">{{ trade.trade_notes }}</textarea>
+            </div>
+            <!-- For now, no scale editing here. You can add scale logic if desired. -->
+
+            <!-- Optional new screenshots -->
+            <div class="form-row">
+              <label for="screenshots_edit_{{ trade.id }}">Screenshots:</label>
+              <input type="file" name="screenshots[]" id="screenshots_edit_{{ trade.id }}" accept="image/*" multiple>
+            </div>
+
+            <div class="form-row">
+              <button type="submit">Save Changes</button>
+            </div>
+          </form>
+        </section>
+      </div>
+    {% endfor %}
+  {% endif %}
+</section>
+
+<!-- Hidden "Add Trade" form -->
+<section class="section-container" id="addTradeForm" style="display: none; margin-top: 20px;">
+  <h3>Add a New Trade</h3>
+  <form action="{{ url_for('add_trade', date_str=day.date) }}" method="POST" enctype="multipart/form-data">
+    <div class="form-row">
+      <label>Side (Buy/Sell):</label>
+      <select name="side">
+        <option value="buy">Buy</option>
+        <option value="sell">Sell</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label>Ticker:</label>
+      <input type="text" name="ticker" placeholder="ES, MNQ, etc.">
+    </div>
+    <div class="form-row">
+      <label>Trade Type:</label>
+      <select name="trade_type">
+        <option value="">-- Select --</option>
+        <option value="futures">Futures</option>
+        <option value="options">Options</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label>Entry Price:</label>
+      <input type="number" name="entry_price" step="any">
+    </div>
+    <div class="form-row">
+      <label>Exit Price:</label>
+      <input type="number" name="exit_price" step="any">
+    </div>
+    <div class="form-row">
+      <label>Contracts:</label>
+      <input type="number" name="contract_count" min="1" value="1">
+    </div>
+    <div class="form-row">
+      <label>Notes:</label>
+      <textarea name="trade_notes" rows="2"></textarea>
+    </div>
+
+    <!-- Scale Events -->
+    <div class="scale-event-row form-row" id="scaleContainer">
+      <label>Scale Price:</label>
+      <input type="number" name="scale_0_price" step="any" placeholder="e.g. 12000.25">
+      <label>Contracts:</label>
+      <input type="number" name="scale_0_contracts" placeholder="e.g. 1">
+    </div>
+    <div class="form-row">
+      <button type="button" onclick="addScaleRow()">Add Scale</button>
+    </div>
+
+    <!-- Screenshots -->
+    <div class="form-row" id="screenshotsContainerTrade">
+      <label for="screenshots_trade_0">Screenshots:</label>
+      <input type="file" name="screenshots[]" id="screenshots_trade_0" accept="image/*">
+    </div>
+    <div class="form-row">
+      <button type="button" onclick="addScreenshotFieldTrade()">Add Another Screenshot</button>
+    </div>
+
+    <div class="form-row">
+      <button type="submit">Add Trade</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

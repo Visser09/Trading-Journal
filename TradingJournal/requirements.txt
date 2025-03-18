@@ -1,0 +1,7 @@
+Flask==2.2.5
+Flask-SQLAlchemy==3.0.2
+holidays
+gunicorn==20.1.0
+Flask-Login
+openai==0.27.8
+Flask-Migrate==3.1.0

@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Settings - Trading Journal{% endblock %}
+{% block content %}
+<section class="section-container">
+  <h2>Settings</h2>
+  
+  <!-- Account Details Section -->
+  <div class="settings-section" style="margin-bottom: 30px;">
+    <h3>Account Details</h3>
+    <div id="accountDisplay">
+      <p><strong>Username:</strong> {{ user.username }}</p>
+      <p><strong>Email:</strong> {{ user.email }}</p>
+      <button type="button" onclick="toggleAccountEdit()">Edit Account Details</button>
+    </div>
+    <div id="accountEdit" style="display: none;">
+      <form action="{{ url_for('settings') }}" method="POST">
+        <div class="form-row">
+          <label for="username">Username:</label>
+          <input type="text" name="username" id="username" value="{{ user.username }}">
+        </div>
+        <div class="form-row">
+          <label for="email">Email:</label>
+          <input type="email" name="email" id="email" value="{{ user.email }}">
+        </div>
+        <div class="form-row">
+          <button type="submit">Save Account Details</button>
+          <button type="button" onclick="toggleAccountEdit()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <!-- Preferences Section -->
+  <div class="settings-section">
+    <h3>Preferences</h3>
+    <form action="{{ url_for('settings') }}" method="POST">
+      <!-- Mode Selection -->
+      <div class="form-row">
+        <label for="mode">Mode:</label>
+        <select name="mode" id="mode">
+          <option value="dark" {% if user.theme_mode == 'dark' %}selected{% endif %}>Dark</option>
+          <option value="light" {% if user.theme_mode == 'light' %}selected{% endif %}>Light</option>
+        </select>
+      </div>
+      <!-- Accent Color Selection -->
+      <div class="form-row">
+        <label for="accent_color">Accent Color:</label>
+        <select name="accent_color" id="accent_color">
+          <option value="purple" {% if user.accent_color == 'purple' %}selected{% endif %}>Purple</option>
+          <option value="blue" {% if user.accent_color == 'blue' %}selected{% endif %}>Blue</option>
+          <option value="green" {% if user.accent_color == 'green' %}selected{% endif %}>Green</option>
+          <option value="red" {% if user.accent_color == 'red' %}selected{% endif %}>Red</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <button type="submit">Save Preferences</button>
+      </div>
+    </form>
+    <!-- logout Button -->
+    <div class="form-row" style="margin-top: 20px;">
+      <a href="{{ url_for('logout') }}" class="btn">Logout</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

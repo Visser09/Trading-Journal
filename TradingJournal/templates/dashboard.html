@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Trading Journal{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+  <!-- Top section with welcome text and nav -->
+  <header class="dashboard-header">
+    <h2>Welcome, {{ current_user.username }}</h2>
+    <nav class="dashboard-nav">
+      <a href="{{ url_for('dashboard') }}">Dashboard</a>
+      <a href="{{ url_for('show_month', year=today.year, month=today.month) }}">Calendar</a>
+      <a href="{{ url_for('quick_entry') }}">Quick Entry</a>
+      <a href="{{ url_for('trades') }}">Trades</a>
+      <a href="{{ url_for('reports') }}">Reports</a>
+      <a href="{{ url_for('settings') }}">Settings</a>
+      <a href="{{ url_for('logout') }}">Logout</a>
+      <!-- Button to toggle the widget dropdown -->
+      <button type="button" class="btn" id="widgetDropdownBtn" onclick="toggleWidgetDropdown()">
+        Customize Dashboard
+      </button>
+    </nav>
+  </header>
+
+  <!-- Dropdown containing widget checkboxes -->
+  <div id="widgetDropdown" class="widget-dropdown">
+    <label><input type="checkbox" class="widget-toggle" data-widget="metric-total-pnl" checked> Total PnL</label>
+    <label><input type="checkbox" class="widget-toggle" data-widget="metric-account-balance" checked> Account Balance</label>
+    <label><input type="checkbox" class="widget-toggle" data-widget="metric-total-trades" checked> Total Trades</label>
+    <label><input type="checkbox" class="widget-toggle" data-widget="metric-win-rate" checked> Win Rate</label>
+    <label><input type="checkbox" class="widget-toggle" data-widget="chart-pnl" checked> PnL Chart</label>
+  </div>
+
+  <!-- Container for all widgets -->
+  <div class="widget-area">
+    <!-- Metrics Section -->
+    <div class="metrics">
+      <div class="metric-card widget" id="metric-total-pnl">
+        <h3>Total PnL</h3>
+        <p>${{ "%.2f"|format(metrics.total_pnl) }}</p>
+      </div>
+      <div class="metric-card widget" id="metric-account-balance">
+        <h3>Account Balance</h3>
+        <p>${{ "%.2f"|format(metrics.account_balance) }}</p>
+      </div>
+      <div class="metric-card widget" id="metric-total-trades">
+        <h3>Total Trades</h3>
+        <p>{{ metrics.total_trades }}</p>
+      </div>
+      <div class="metric-card widget" id="metric-win-rate">
+        <h3>Win Rate</h3>
+        <p>{{ metrics.win_rate }}</p>
+      </div>
+    </div>
+
+    <!-- Chart Section -->
+    <section class="dashboard-chart widget" id="chart-pnl">
+      <h2>PnL Over Time</h2>
+      <canvas id="pnlChart" width="400" height="150"></canvas>
+    </section>
+  </div>
+
+  <!-- Chart.js logic -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const ctx = document.getElementById('pnlChart');
+    const pnlChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: {{ chart_labels|tojson }},
+        datasets: [{
+          label: 'PnL',
+          data: {{ chart_data|tojson }},
+          borderColor: 'var(--primary-color)',
+          backgroundColor: 'rgba(75,192,192,0.4)',
+          tension: 0.3
+        }]
+      }
+    });
+  </script>
+</div>
+{% endblock %}

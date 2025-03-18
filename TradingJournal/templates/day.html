@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% block title %}Day: {{ day.date }}{% endblock %}
+{% block content %}
+<h2>Day: {{ day.date }}</h2>
+
+<!-- Day-level notes form -->
+<section class="section-container">
+  <h3>Day Notes</h3>
+  <form action="{{ url_for('save_dayrecord', date_str=day.date) }}" method="POST">
+    <div class="form-row">
+      <textarea name="day_notes" rows="3" style="width: 100%;">{{ day.day_notes }}</textarea>
+    </div>
+    <div class="form-row">
+      <button type="submit">Save Day Notes</button>
+    </div>
+  </form>
+</section>
+
+<!-- List Existing Trades -->
+<section class="section-container">
+  <h3>Trades for This Day</h3>
+  <p><strong>Day PnL:</strong> {{ "%.2f"|format(day.pnl) }}</p>
+  {% if day.trades|length == 0 %}
+    <p>No trades yet.</p>
+  {% else %}
+    {% for trade in day.trades %}
+      <div class="trade-box" style="border: 1px solid #555; margin-bottom: 10px; padding: 10px;">
+        <p><strong>Trade #{{ trade.id }}</strong></p>
+        <p><strong>Side:</strong> {{ trade.side|title }} | 
+           <strong>Ticker:</strong> {{ trade.ticker }} | 
+           <strong>Type:</strong> {{ trade.trade_type }}</p>
+        <p><strong>Entry Price:</strong> {{ trade.entry_price }} | 
+           <strong>Exit Price:</strong> {{ trade.exit_price }} | 
+           <strong>Contracts:</strong> {{ trade.contract_count }}</p>
+        <p><strong>Trade PnL:</strong> {{ "%.2f"|format(trade.trade_pnl) }}</p>
+        <p><strong>Notes:</strong> {{ trade.trade_notes }}</p>
+
+        {% if trade.scale_events|length > 0 %}
+          <ul>
+            {% for scale in trade.scale_events %}
+              <li>Scale Price: {{ scale.scale_price }} | Contracts: {{ scale.scale_contracts }}</li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p>No scale events.</p>
+        {% endif %}
+        <!-- Optional: Add scale form -->
+        <form action="{{ url_for('add_scale_event', trade_id=trade.id) }}" method="POST" style="margin-top: 10px;">
+          <label>Scale Price:</label>
+          <input type="number" name="scale_price" step="any">
+          <label>Contracts:</label>
+          <input type="number" name="scale_contracts">
+          <button type="submit">Add Scale Event</button>
+        </form>
+      </div>
+    {% endfor %}
+  {% endif %}
+</section>
+
+<!-- Add a New Trade -->
+<section class="section-container">
+  <h3>Add a New Trade</h3>
+  <form action="{{ url_for('add_trade', date_str=day.date) }}" method="POST" enctype="multipart/form-data">
+    <div class="form-row">
+      <label>Side (Buy/Sell):</label>
+      <select name="side">
+        <option value="buy">Buy</option>
+        <option value="sell">Sell</option>
+      </select>
+    </div>
+
+    <div class="form-row">
+      <label>Ticker:</label>
+      <input type="text" name="ticker" placeholder="ES, MNQ, etc.">
+    </div>
+
+    <div class="form-row">
+      <label>Trade Type:</label>
+      <select name="trade_type">
+        <option value="">-- Select --</option>
+        <option value="futures">Futures</option>
+        <option value="options">Options</option>
+      </select>
+    </div>
+
+    <div class="form-row">
+      <label>Entry Price:</label>
+      <input type="number" name="entry_price" step="any">
+    </div>
+
+    <div class="form-row">
+      <label>Exit Price:</label>
+      <input type="number" name="exit_price" step="any">
+    </div>
+
+    <div class="form-row">
+      <label>Contracts:</label>
+      <input type="number" name="contract_count" min="1" value="1">
+    </div>
+
+    <!-- Scale Events (above screenshots) -->
+    <div class="scale-event-row form-row" id="scaleContainer">
+      <label>Scale Price:</label>
+      <input type="number" name="scale_0_price" step="any" placeholder="e.g. 12000.25">
+      <label>Contracts:</label>
+      <input type="number" name="scale_0_contracts" placeholder="e.g. 1">
+    </div>
+    <div class="form-row">
+      <button type="button" onclick="addScaleRow()">Add Scale</button>
+    </div>
+
+    <div class="form-row">
+      <label>Trade Notes:</label>
+      <textarea name="trade_notes" rows="2"></textarea>
+    </div>
+
+    <!-- Screenshots container -->
+    <div class="form-row" id="screenshotsContainerTrade">
+      <label for="screenshots_trade_0">Screenshots:</label>
+      <input type="file" name="screenshots[]" id="screenshots_trade_0" accept="image/*">
+    </div>
+    <div class="form-row">
+      <button type="button" onclick="addScreenshotFieldTrade()">Add Another Screenshot</button>
+    </div>
+
+    <div class="form-row">
+      <button type="submit">Add Trade</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

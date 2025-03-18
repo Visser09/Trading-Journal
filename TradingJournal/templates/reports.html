@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Reports - Trading Journal{% endblock %}
+{% block content %}
+<header>
+  <h2>Reports</h2>
+</header>
+<main>
+  <section class="section-container">
+    <h3>Summary Metrics</h3>
+    <div class="report-metrics">
+      <div class="metric-card">
+        <h4>Total PnL</h4>
+        <p>${{ "%.2f"|format(metrics.total_pnl) }}</p>
+      </div>
+      <div class="metric-card">
+        <h4>Win Rate</h4>
+        <p>{{ metrics.win_rate }}</p>
+      </div>
+      <div class="metric-card">
+        <h4>Total Trades</h4>
+        <p>{{ metrics.trade_count }}</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-container">
+    <h3>Detailed Metrics</h3>
+    <div class="report-metrics">
+      <div class="metric-card">
+        <h4>Profit Factor</h4>
+        <p>{{ metrics.profit_factor }}</p>
+      </div>
+      <div class="metric-card">
+        <h4>Max Drawdown</h4>
+        <p>${{ "%.2f"|format(metrics.max_drawdown) }}</p>
+      </div>
+      <div class="metric-card">
+        <h4>Average Win</h4>
+        <p>${{ "%.2f"|format(metrics.average_win) }}</p>
+      </div>
+      <div class="metric-card">
+        <h4>Average Loss</h4>
+        <p>${{ "%.2f"|format(metrics.average_loss) }}</p>
+      </div>
+      <div class="metric-card">
+        <h4>Average Trade Duration</h4>
+        <p>{{ metrics.average_duration }} days</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Chat moved here -->
+  <section class="dashboard-chart">
+    <h2>PnL Over Time</h2>
+    <canvas id="pnlChart" width="400" height="150"></canvas>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+  const ctx = document.getElementById('pnlChart');
+  const pnlChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+          labels: {{ metrics.chart_labels|tojson }},
+          datasets: [{
+              label: 'PnL',
+              data: {{ metrics.chart_data|tojson }},
+              borderColor: 'var(--primary-color)',
+              backgroundColor: 'rgba(75,192,192,0.4)',
+              tension: 0.3
+          }]
+      },
+  });
+  </script>
+</main>
+{% endblock %}

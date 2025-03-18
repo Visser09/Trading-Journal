@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}AI Trading Assistant{% endblock %}
+
+{% block content %}
+<div style="text-align: center; margin-top: 50px;">
+  <h2>No Conversations Yet</h2>
+  <p>Start a new chat to begin.</p>
+  <form action="{{ url_for('new_conversation') }}" method="POST">
+    <button type="submit">+ New Chat</button>
+  </form>
+</div>
+{% endblock %}

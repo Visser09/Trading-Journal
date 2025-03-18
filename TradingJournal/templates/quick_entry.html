@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Quick Entry - Trading Journal{% endblock %}
+{% block content %}
+<section class="section-container">
+  <h2>Quick Entry</h2>
+  <form action="{{ url_for('save_dayrecord') }}" method="POST" enctype="multipart/form-data">
+    <!-- Date at the top -->
+    <div class="form-row">
+      <label for="date_str">Date:</label>
+      <input type="date" name="date_str" id="date_str" required>
+    </div>
+
+    <!-- Side (Buy/Sell) -->
+    <div class="form-row">
+      <label>Side (Buy/Sell):</label>
+      <select name="side">
+        <option value="buy">Buy</option>
+        <option value="sell">Sell</option>
+      </select>
+    </div>
+
+    <!-- Ticker -->
+    <div class="form-row">
+      <label>Ticker:</label>
+      <input type="text" name="ticker" placeholder="ES, NQ, TSLA">
+    </div>
+
+    <!-- Trade Type -->
+    <div class="form-row">
+      <label>Trade Type:</label>
+      <select name="trade_type">
+        <option value="">-- Select --</option>
+        <option value="futures">Futures</option>
+        <option value="options">Options</option>
+      </select>
+    </div>
+
+    <!-- Entry/Exit -->
+    <div class="form-row">
+      <label>Entry Price:</label>
+      <input type="number" name="entry_price" step="any">
+    </div>
+    <div class="form-row">
+      <label>Exit Price:</label>
+      <input type="number" name="exit_price" step="any">
+    </div>
+
+    <!-- Contracts -->
+    <div class="form-row">
+      <label>Contracts:</label>
+      <input type="number" name="contract_count" min="1" value="1">
+    </div>
+
+    <!-- Scale Events (above screenshots) -->
+    <div class="scale-event-row form-row" id="scaleContainerQE">
+      <label>Scale Price:</label>
+      <input type="number" name="scale_0_price" step="any" placeholder="e.g. 12000.25">
+      <label>Contracts:</label>
+      <input type="number" name="scale_0_contracts" placeholder="e.g. 1">
+    </div>
+    <div class="form-row">
+      <button type="button" onclick="addScaleRowQE()">Add Scale</button>
+    </div>
+
+    <!-- Notes -->
+    <div class="form-row">
+      <label>Notes:</label>
+      <textarea name="notes" rows="3"></textarea>
+    </div>
+
+    <!-- Screenshots -->
+    <div class="form-row" id="screenshotsContainerQE">
+      <label for="screenshots_qe_0">Screenshots:</label>
+      <input type="file" name="screenshots[]" id="screenshots_qe_0" accept="image/*">
+    </div>
+    <div class="form-row">
+      <button type="button" onclick="addScreenshotFieldQE()">Add Another Screenshot</button>
+    </div>
+
+    <!-- Submit -->
+    <div class="form-row">
+      <button type="submit">Submit Entry</button>
+    </div>
+  </form>
+</section>
+{% endblock %}

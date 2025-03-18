@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Calendar - Trading Journal{% endblock %}
+{% block content %}
+<header>
+  <h2>{{ month_name }} {{ year }}</h2>
+  <nav>
+    <a href="{{ url_for('show_month', year=prev_year, month=prev_month) }}">&#9664; Prev</a>
+    <a href="{{ url_for('show_month', year=next_year, month=next_month) }}">Next &#9654;</a>
+  </nav>
+</header>
+<main>
+  <table class="calendar">
+    <thead>
+      <tr>
+        <th>Sun</th>
+        <th>Mon</th>
+        <th>Tue</th>
+        <th>Wed</th>
+        <th>Thu</th>
+        <th>Fri</th>
+        <th>Sat</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for week in weeks %}
+        <tr>
+          {% for day in week %}
+            {% if day[0] == 0 %}
+              <td class="other-month"></td>
+            {% else %}
+              <td class="day-cell" style="border-color: {{ day[2] }};">
+                <a href="{{ url_for('show_day', date_str=day[1]) }}" class="day-link" style="color: {{ day[2] }};" title="{{ day[4] }}">
+                  <div class="day-num">{{ day[0] }}</div>
+                  {% if day[4] %}
+                    <div class="holiday-label" style="font-size: 0.75em;">{{ day[4] }}</div>
+                  {% endif %}
+                    <div class="pnl">
+                      {% if day[3] is not none %}
+                        ${{ "%.2f"|format(day[3]) }}
+                      {% else %}
+                        No Trades
+                      {% endif %}
+                    </div>
+                  </a>
+                </td>
+              {% endif %}
+            {% endfor %}
+          </tr>
+        {% endfor %}
+
+    </tbody>
+  </table>
+</main>
+{% endblock %}

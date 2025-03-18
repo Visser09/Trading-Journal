@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Trading Journal{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <!-- Your dynamic theme <style> block remains the same -->
+    
+    <!-- Place this in your <body>, above or inside your header -->
+    <button id="hamburger" onclick="toggleSidebar()">☰</button>
+
+    <style>
+      :root {
+        {% if theme_mode == 'light' %}
+          {% if accent_color == 'blue' %}
+            --primary-color: #007bff;
+            --secondary-color: #0056b3;
+            --bg-color: #ffffff;
+            --text-color: #000000;
+            --accent-color: #66bfff;
+            --sidebar-bg-color: #dbe9ff;
+            --input-bg: #f8f8f8;
+            --button-text-color: #000000;
+            --other-month-bg: #e8f1fa;
+            --section-bg: #f5faff;
+          {% elif accent_color == 'green' %}
+            --primary-color: #28a745;
+            --secondary-color: #1e7e34;
+            --bg-color: #ffffff;
+            --text-color: #000000;
+            --accent-color: #70d17b;
+            --sidebar-bg-color: #d9f0e2;
+            --input-bg: #f8f8f8;
+            --button-text-color: #000000;
+            --other-month-bg: #e3f6ed;
+            --section-bg: #ecfbf4;
+          {% elif accent_color == 'red' %}
+            --primary-color: #dc3545;
+            --secondary-color: #bd2130;
+            --bg-color: #ffffff;
+            --text-color: #000000;
+            --accent-color: #e66775;
+            --sidebar-bg-color: #f8d7da;
+            --input-bg: #f8f8f8;
+            --button-text-color: #000000;
+            --other-month-bg: #fdecea;
+            --section-bg: #fce8e9;
+          {% else %}
+            /* Light Purple default */
+            --primary-color: #bb86fc;
+            --secondary-color: #9b66d1;
+            --bg-color: #ffffff;
+            --text-color: #000000;
+            --accent-color: #d0a9ff;
+            --sidebar-bg-color: #e8d9ff;
+            --input-bg: #f8f8f8;
+            --button-text-color: #000000;
+            --other-month-bg: #f2e6ff;
+            --section-bg: #f9f3ff;
+          {% endif %}
+        {% else %}
+          {% if accent_color == 'blue' %}
+            --primary-color: #007bff;
+            --secondary-color: #0056b3;
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --accent-color: #66bfff;
+            --sidebar-bg-color: #1e1e1e;
+            --input-bg: #272727;
+            --button-text-color: #121212;
+            --other-month-bg: rgba(18, 18, 18, 0.9);
+            --section-bg: rgba(30, 30, 30, 0.9);
+          {% elif accent_color == 'green' %}
+            --primary-color: #28a745;
+            --secondary-color: #1e7e34;
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --accent-color: #70d17b;
+            --sidebar-bg-color: #1e1e1e;
+            --input-bg: #272727;
+            --button-text-color: #121212;
+            --other-month-bg: rgba(18, 18, 18, 0.9);
+            --section-bg: rgba(30, 30, 30, 0.9);
+          {% elif accent_color == 'red' %}
+            --primary-color: #dc3545;
+            --secondary-color: #bd2130;
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --accent-color: #e66775;
+            --sidebar-bg-color: #1e1e1e;
+            --input-bg: #272727;
+            --button-text-color: #121212;
+            --other-month-bg: rgba(18, 18, 18, 0.9);
+            --section-bg: rgba(30, 30, 30, 0.9);
+          {% else %}
+            /* Dark Purple default */
+            --primary-color: #bb86fc;
+            --secondary-color: #9b66d1;
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --accent-color: #d0a9ff;
+            --sidebar-bg-color: #1e1e1e;
+            --input-bg: #272727;
+            --button-text-color: #121212;
+            --other-month-bg: rgba(18, 18, 18, 0.9);
+            --section-bg: rgba(30, 30, 30, 0.9);
+          {% endif %}
+        {% endif %}
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Hamburger button always visible -->
+    <button id="hamburger" onclick="toggleSidebar()">☰</button>
+  
+    <div class="page-wrapper">
+      <div class="page-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+          <h1>Trading Journal</h1>
+          <nav>
+            <ul>
+              <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+              <li><a href="{{ url_for('show_month', year=today.year, month=today.month) }}">Calendar</a></li>
+              <li><a href="{{ url_for('quick_entry') }}">Quick Entry</a></li>
+              <li><a href="{{ url_for('trades') }}">Trades</a></li>
+              <li><a href="{{ url_for('reports') }}">Reports</a></li>
+              <li><a href="{{ url_for('settings') }}">Settings</a></li>
+              <li><a href="{{ url_for('ai_chat') }}">AI Chat</a></li>
+            </ul>
+          </nav>
+        </div>
+  
+        <!-- Main Content -->
+        <div class="main-content">
+          {% with messages = get_flashed_messages() %}
+            {% if messages %}
+              <div class="flash-messages">
+                {% for message in messages %}
+                  <p>{{ message }}</p>
+                {% endfor %}
+              </div>
+            {% endif %}
+          {% endwith %}
+          {% block content %}{% endblock %}
+        </div>
+      </div>
+  
+      <!-- Footer -->
+      <footer class="footer">
+        <p>&copy; {{ current_year|default(2025) }} Trading Journal. All rights reserved.</p>
+      </footer>
+    </div>
+  </body>
+</html>

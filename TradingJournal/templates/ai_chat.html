@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}AI Chat{% endblock %}
+{% block content %}
+<div class="chat-page" style="display: flex; flex-direction: column; height: 100vh;">
+  <!-- Chat Header: Title, New Chat Button, & Chats Dropdown -->
+  <header class="chat-header" style="display: flex; justify-content: space-between; align-items: center; padding: 10px;">
+    <h2 style="margin: 0;">AI Chat</h2>
+    <div class="chat-controls" style="display: flex; gap: 5px; align-items: center;">
+      <form action="{{ url_for('new_conversation') }}" method="POST" style="display: inline;">
+        <button id="newChatBtn" type="submit" style="padding: 5px 10px; font-size: 0.9em;">New Chat</button>
+      </form>      
+      <div class="conversation-dropdown-container" style="position: relative;">
+        <button id="conversationDropdownBtn" onclick="toggleConversationDropdown()" style="padding: 5px 10px; font-size: 0.9em;">
+          Chats &#9662;
+        </button>
+        <div id="conversationDropdown" style="display: none; position: absolute; right: 0; background: var(--section-bg); border: 1px solid var(--primary-color); border-radius: 5px; z-index: 1000; min-width: 150px;">
+          <ul style="list-style: none; margin: 0; padding: 5px;">
+            {% for conv in user_conversations %}
+            <li style="padding: 5px; cursor: pointer;" onclick="location.href='{{ url_for('ai_chat_conv', conv_id=conv.id) }}'">
+              {{ conv.title if conv.title != "New Chat" else conv.created_at.strftime('%Y-%m-%d %H:%M') }}
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </header>
+  
+  <!-- Chat Container: Messages & Input -->
+  <div class="chat-container" style="flex: 1; display: flex; flex-direction: column; overflow: hidden; padding: 0 20px;">
+    <!-- Chat Messages Area -->
+    <div class="chat-window" style="flex: 1; overflow-y: auto; padding: 10px;">
+      {% for msg in messages %}
+        <div class="chat-message {{ msg.role }}" style="margin-bottom: 10px; display: flex; {% if msg.role == 'user' %}justify-content: flex-end;{% else %}justify-content: flex-start;{% endif %}">
+          <div class="bubble" style="padding: 10px; border-radius: 8px; max-width: 70%; {% if msg.role == 'user' %}background-color: #4f7dff;{% else %}background-color: #444654;{% endif %}">
+            {{ msg.content }}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+    <!-- Chat Input Form (Rounded, Centered, & Slightly Raised) -->
+    <form method="POST" class="chat-input-form" style="display: flex; padding: 10px; border-top: 1px solid var(--primary-color); align-items: center; margin-bottom: 20px;">
+      <textarea name="user_message" rows="1" placeholder="Type your message..." required style="flex: 1; padding: 10px; border-radius: 20px; border: 1px solid var(--primary-color); margin: auto;"></textarea>
+      <button type="button" onclick="document.getElementById('chat_picture').click()" style="margin-left: 10px; padding: 10px;">Picture</button>
+      <button type="submit" style="margin-left: 10px; padding: 10px 20px;">Send</button>
+      <input type="file" name="chat_picture" accept="image/*" id="chat_picture" style="display: none;">
+    </form>
+  </div>
+</div>
+
+<script>
+  function toggleConversationDropdown() {
+    var dropdown = document.getElementById("conversationDropdown");
+    dropdown.style.display = (dropdown.style.display === "none" || dropdown.style.display === "") ? "block" : "none";
+  }
+
+  // Send message on Enter (unless Shift+Enter is used)
+  document.addEventListener('DOMContentLoaded', function() {
+    var chatTextarea = document.querySelector('.chat-input-form textarea[name="user_message"]');
+    chatTextarea.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        this.form.submit();
+      }
+    });
+  });
+</script>
+{% endblock %}
